@@ -1,29 +1,32 @@
 const express = require("express");
-const { updateContactSchema, createContactSchema } = require("../../schemes/contacts.schemes.js");
 const router = express.Router();
-const contactsController = require("../../model/index.js");
-const { validate } = require("../../validation/contacts.validation.js");
+const { updateContactSchema, createContactSchema } = require("../../schemes/contacts.schemes.js");
+const { validateCreate, validateUpdate } = require("../../validation/contacts.validation.js");
+const { contactsService } = require("./contacts.errors");
 
 router.get("/", (req, res, next) => {
-  return res.status(200).send(contactsController.listContacts());
+  const contacts = contactsService.getContacts();
+  return res.status(200).send(contacts);
 });
 
 router.get("/:contactId", (req, res, next) => {
-  return res.status(200).send(contactsController.getContactById(req.params.contactId));
+  const contact = contactsService.getContact(req.params.contactId);
+  return res.status(200).send(contact);
 });
 
-router.post("/", validate(createContactSchema), (req, res, next) => {
-  return res.status(200).send(contactsController.addContact(req.body));
+router.post("/", validateCreate(createContactSchema), (req, res, next) => {
+  const contact = contactsService.createContact(req.body);
+  return res.status(201).send(contact);
 });
 
 router.delete("/:contactId", (req, res, next) => {
-  const removedContact = contactsController.removeContact(req.params.contactId);
-  return res.status(200).send(removedContact);
+  const contact = contactsService.deleteContact(req.params.contactId);
+  return res.status(200).json({ message: "Contact deleted" });
 });
 
-router.patch("/:contactId", (req, res, next) => {
-  const updatedContact = contactsController.updateContact(req.params.contactId, req.body);
-  return res.status(200).send(updatedContact);
+router.patch("/:contactId", validateUpdate(updateContactSchema), (req, res, next) => {
+  const contact = contactsService.updateContact(req.params.contactId, req.body);
+  return res.status(200).send(contact);
 });
 
 module.exports = router;
