@@ -45,3 +45,27 @@ exports.validateStatus = (schema, reqPart = "body") => {
     next();
   };
 };
+
+exports.validateSignUp = (schema, reqPart = "body") => {
+  return (req, res, next) => {
+    const result = schema.validate(req[reqPart]);
+    const message = "Ошибка от Joi или другой библиотеки валидации";
+    if (result.error) {
+      return res.status(400).json({ message });
+    }
+
+    next();
+  };
+};
+
+exports.validateLogIn = (schema, reqPart = "body") => {
+  return (req, res, next) => {
+    const result = schema.validate(req[reqPart]);
+    const message = "Email or password is wrong";
+    if (result.error) {
+      return res.status(401).json({ message });
+    }
+
+    next();
+  };
+};
