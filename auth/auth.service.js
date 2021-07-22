@@ -33,11 +33,8 @@ class AuthService {
     return { user, token };
   }
 
-  async logOut({ email }) {
-    const user = await UserModel.findOne({ email });
-    if (!user) {
-      throw new Unauthorized("Not authorized");
-    }
+  async logOut({ _id }) {
+    await UserModel.findByIdAndUpdate(_id, { token: null }, { new: true });
   }
 }
 
