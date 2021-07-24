@@ -29,6 +29,8 @@ mongoose.connect(
 );
 
 const contactsRouter = require("./routes/api/contacts.controller");
+const { authController } = require("./auth/auth.controller");
+const { usersController } = require("./users/user.controller");
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
@@ -38,6 +40,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
+app.use("/users", usersController);
+app.use("/auth", authController);
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: err.message });
