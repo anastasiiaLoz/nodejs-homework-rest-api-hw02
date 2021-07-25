@@ -18,4 +18,8 @@ router.post(
   })
 );
 
+router.post("/avatars", authorize, upload.single("avatar"), (req, res, next) => {
+  res.send();
+});
+
 exports.usersController = router;
