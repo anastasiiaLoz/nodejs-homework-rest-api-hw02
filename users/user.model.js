@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcryptjs = require("bcryptjs");
 require("dotenv").config();
+const gravatar = require("gravatar");
 
 const userSchema = new Schema({
   username: {
@@ -25,7 +26,8 @@ const userSchema = new Schema({
   token: {
     type: String,
     default: null
-  }
+  },
+  avatarURL: String
 });
 
 userSchema.statics.hashPassword = async password => {
@@ -36,4 +38,10 @@ userSchema.statics.isPasswordCorrect = async (password, passwordHash) => {
   return bcryptjs.compare(password, passwordHash);
 };
 
+userSchema.statics.avatarURL = async email => {
+  const avatarURL = gravatar.url(email, { protocol: "https" });
+  return avatarURL;
+};
+
 exports.UserModel = mongoose.model("User", userSchema);
+exports.avatarURL = this.avatarURL;

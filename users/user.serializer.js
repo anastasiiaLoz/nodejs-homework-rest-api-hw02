@@ -1,7 +1,8 @@
 function prepareUser(user) {
   return {
     email: user.email,
-    subscription: user.subscription
+    subscription: user.subscription,
+    avatarURL: user.avatarURL
   };
 }
 

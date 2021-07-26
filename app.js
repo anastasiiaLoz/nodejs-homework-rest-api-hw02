@@ -42,6 +42,7 @@ app.use(express.json());
 app.use("/api/contacts", contactsRouter);
 app.use("/users", usersController);
 app.use("/auth", authController);
+app.use("/avatars", express.static("public/avatars"));
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: err.message });
