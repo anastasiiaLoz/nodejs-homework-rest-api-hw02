@@ -1,6 +1,7 @@
 const { Conflict, Unauthorized, NotFound } = require("http-errors");
 const { UserModel } = require("../users/user.model");
 const jwt = require("jsonwebtoken");
+const { avatarURL } = require("../users/user.model");
 
 class AuthService {
   async signUp({ username, email, password }) {
@@ -11,7 +12,8 @@ class AuthService {
     const newUser = await UserModel.create({
       username,
       email,
-      passwordHash: await UserModel.hashPassword(password)
+      passwordHash: await UserModel.hashPassword(password),
+      avatarURL: await UserModel.avatarURL(email)
     });
     return newUser;
   }
@@ -35,6 +37,23 @@ class AuthService {
 
   async logOut({ _id }) {
     await UserModel.findByIdAndUpdate(_id, { token: null }, { new: true });
+  }
+
+  async updateAvatar(req) {
+    const { _id } = req.user;
+    const { filename } = req.file;
+    const updatedAvatar = await UserModel.findByIdAndUpdate(
+      _id,
+      {
+        avatarURL: `http://localhost:4040/avatars/${filename}`
+      },
+      { new: true }
+    );
+
+    if (!updatedAvatar) {
+      throw new Unauthorized("Not Authorized");
+    }
+    return updatedAvatar;
   }
 }
 
