@@ -27,7 +27,15 @@ const userSchema = new Schema({
     type: String,
     default: null
   },
-  avatarURL: String
+  avatarURL: String,
+  verify: {
+    type: Boolean,
+    default: false
+  },
+  verifyToken: {
+    type: String,
+    required: [true, "Verify token is required"]
+  }
 });
 
 userSchema.statics.hashPassword = async password => {
