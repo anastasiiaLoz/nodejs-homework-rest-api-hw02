@@ -1,10 +1,11 @@
-const { Conflict, Unauthorized, NotFound } = require("http-errors");
+const { Conflict, Unauthorized, NotFound, NotImplemented, BadRequest } = require("http-errors");
 const { UserModel } = require("../users/user.model");
 const jwt = require("jsonwebtoken");
-const { avatarURL } = require("../users/user.model");
+const uuid = require("uuid");
+const { mailingClient } = require("../helpers/mailing.client");
 
 class AuthService {
-  async signUp({ username, email, password }) {
+  async signUp({ username, email, password, verificationToken }) {
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       throw new Conflict("Email in use");
@@ -13,8 +14,12 @@ class AuthService {
       username,
       email,
       passwordHash: await UserModel.hashPassword(password),
-      avatarURL: await UserModel.avatarURL(email)
+      avatarURL: await UserModel.avatarURL(email),
+      verificationToken: uuid.v4()
     });
+    console.log(verificationToken);
+    await mailingClient.sendVerificationEmail(newUser.email, newUser.verificationToken);
+
     return newUser;
   }
 
@@ -54,6 +59,26 @@ class AuthService {
       throw new Unauthorized("Not Authorized");
     }
     return updatedAvatar;
+  }
+
+  async verifyEmail(verificationToken) {
+    const user = await UserModel.findOneAndUpdate({ verificationToken: null }, { verify: true }, { new: true });
+    if (!user) {
+      throw new NotFound(` User with verification token '${verificationToken}' was not found`);
+    }
+    return user;
+  }
+
+  async reverifyEmail(email) {
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      throw new BadRequest("Missing required field email");
+    }
+    if (user.verify === false) {
+      await mailingClient.sendVerificationEmail(user.email, user.verificationToken);
+      return false;
+    }
+    return true;
   }
 }
 
